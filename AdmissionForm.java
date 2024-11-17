@@ -2,115 +2,172 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import javax.swing.table.DefaultTableModel;
+import java.text.SimpleDateFormat;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 
 public class AdmissionForm extends JFrame implements ActionListener {
-    private JTextField nameField, presAddress, nationality;
-    private JRadioButton maleRadio, femaleRadio, aRadioButton, bRadioButton, abRadioButton, oRadioButton;
-    private JCheckBox mathCheckBox, physicsCheckBox, chemistryCheckBox;
-    private JButton submitButton;
-    private JButton resetButton;
+    private JTextField nameField, presAddress, nationality, emailField, contactField;
+    private JRadioButton maleRadio, femaleRadio, aRadioButton, bRadioButton, abRadioButton, oRadioButton, aMinusRadioButton, bMinusRadioButton, abMinusRadioButton, oMinusRadioButton;
+    private JComboBox<String> programComboBox;
+    private JSpinner dobSpinner;
+    private JButton submitButton, resetButton;
+    private JTable table;
+    private DefaultTableModel tableModel;
+    private ButtonGroup genderGroup, bloodGroup;
 
     public AdmissionForm() {
         super("Admission Form");
-        setLayout(new FlowLayout());
-        add(new JLabel("Name:"));
+
+        setLayout(new GridLayout(2, 1));
+
+        JPanel formPanel = new JPanel(new GridLayout(0, 2, 5, 5));
+        formPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+        formPanel.add(new JLabel("Full Name:"));
         nameField = new JTextField(15);
-        add(nameField);
+        formPanel.add(nameField);
 
-        add(new JLabel("Present Address: "));
+        formPanel.add(new JLabel("Present Address:"));
         presAddress = new JTextField(20);
-        add(presAddress);
+        formPanel.add(presAddress);
 
-        add(new JLabel("Nationality: "));
+        formPanel.add(new JLabel("Nationality:"));
         nationality = new JTextField(15);
-        add(nationality);
+        formPanel.add(nationality);
 
-        add(new JLabel("Gender:"));
+        formPanel.add(new JLabel("Email Address:"));
+        emailField = new JTextField(20);
+        formPanel.add(emailField);
+
+        formPanel.add(new JLabel("Date of Birth:"));
+        dobSpinner = new JSpinner(new SpinnerDateModel());
+        JSpinner.DateEditor dateEditor = new JSpinner.DateEditor(dobSpinner, "yyyy-MM-dd");
+        dobSpinner.setEditor(dateEditor);
+        formPanel.add(dobSpinner);
+
+        formPanel.add(new JLabel("Contact Number:"));
+        contactField = new JTextField(15);
+        formPanel.add(contactField);
+
+        formPanel.add(new JLabel("Program Name:"));
+        String[] programs = {"CSE", "EEE", "SWE", "LLB", "BBA", "English"};
+        programComboBox = new JComboBox<>(programs);
+        formPanel.add(programComboBox);
+
+        formPanel.add(new JLabel("Gender:"));
         maleRadio = new JRadioButton("Male");
         femaleRadio = new JRadioButton("Female");
-        ButtonGroup genderGroup1 = new ButtonGroup();
-        genderGroup1.add(maleRadio);
-        genderGroup1.add(femaleRadio);
-        add(maleRadio);
-        add(femaleRadio);
+        genderGroup = new ButtonGroup();
+        genderGroup.add(maleRadio);
+        genderGroup.add(femaleRadio);
 
-        add(new JLabel("Subjects:"));
-        mathCheckBox = new JCheckBox("Math");
-        physicsCheckBox = new JCheckBox("Physics");
-        chemistryCheckBox = new JCheckBox("Chemistry");
-        add(mathCheckBox);
-        add(physicsCheckBox);
-        add(chemistryCheckBox);
+        JPanel genderPanel = new JPanel(new GridLayout(1, 2));
+        genderPanel.add(maleRadio);
+        genderPanel.add(femaleRadio);
+        formPanel.add(genderPanel);
 
-        add(new JLabel("Blood Group"));
+        formPanel.add(new JLabel("Blood Group:"));
         aRadioButton = new JRadioButton("A+");
         bRadioButton = new JRadioButton("B+");
         abRadioButton = new JRadioButton("AB+");
         oRadioButton = new JRadioButton("O+");
-        ButtonGroup genderGroup2 = new ButtonGroup();
-        genderGroup2.add(aRadioButton);
-        genderGroup2.add(bRadioButton);
-        genderGroup2.add(abRadioButton);
-        genderGroup2.add(oRadioButton);
-        add(aRadioButton);
-        add(bRadioButton);
-        add(abRadioButton);
-        add(oRadioButton);
+        aMinusRadioButton = new JRadioButton("A-");
+        bMinusRadioButton = new JRadioButton("B-");
+        abMinusRadioButton = new JRadioButton("AB-");
+        oMinusRadioButton = new JRadioButton("O-");
+
+        bloodGroup = new ButtonGroup();
+        bloodGroup.add(aRadioButton);
+        bloodGroup.add(bRadioButton);
+        bloodGroup.add(abRadioButton);
+        bloodGroup.add(oRadioButton);
+        bloodGroup.add(aMinusRadioButton);
+        bloodGroup.add(bMinusRadioButton);
+        bloodGroup.add(abMinusRadioButton);
+        bloodGroup.add(oMinusRadioButton);
+
+        JPanel bloodGroupPanel = new JPanel(new GridLayout(2, 4));
+        bloodGroupPanel.add(aRadioButton);
+        bloodGroupPanel.add(bRadioButton);
+        bloodGroupPanel.add(abRadioButton);
+        bloodGroupPanel.add(oRadioButton);
+        bloodGroupPanel.add(aMinusRadioButton);
+        bloodGroupPanel.add(bMinusRadioButton);
+        bloodGroupPanel.add(abMinusRadioButton);
+        bloodGroupPanel.add(oMinusRadioButton);
+        formPanel.add(bloodGroupPanel);
 
         submitButton = new JButton("Submit");
         submitButton.addActionListener(this);
-        add(submitButton);
+        formPanel.add(submitButton);
 
         resetButton = new JButton("Reset");
         resetButton.addActionListener(this);
-        add(resetButton);
+        formPanel.add(resetButton);
+
+        add(formPanel);
+
+        String[] columnNames = {
+            "Full Name", "Present Address", "Nationality", "Email", "DateOfBirth", "Contact", "Program",
+            "Gender", "Blood Group"
+        };
+        tableModel = new DefaultTableModel(columnNames, 0);
+        table = new JTable(tableModel);
+        JScrollPane scrollPane = new JScrollPane(table);
+        scrollPane.setPreferredSize(new Dimension(500, 150));
+        add(scrollPane);
     }
+
     @Override
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == submitButton) {
+            String email = emailField.getText();
+            if (!email.contains("@")) {
+                JOptionPane.showMessageDialog(this, "Please enter a valid email with '@'.", "Invalid Email", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
             String name = nameField.getText();
             String address = presAddress.getText();
             String nation = nationality.getText();
+            String dob = new SimpleDateFormat("yyyy-MM-dd").format(dobSpinner.getValue());
+            String contact = contactField.getText();
+            String program = (String) programComboBox.getSelectedItem();
             String gender = maleRadio.isSelected() ? "Male" : femaleRadio.isSelected() ? "Female" : "Other";
-            String subjects = "";
-            String bloodGroup = "";
+            String bloodGroupText = "";
 
-            if (mathCheckBox.isSelected())
-                subjects += "Math ";
-            if (physicsCheckBox.isSelected())
-                subjects += "Physics ";
-            if (chemistryCheckBox.isSelected())
-                subjects += "Chemistry ";
+            if (aRadioButton.isSelected()) bloodGroupText = "A+";
+            else if (bRadioButton.isSelected()) bloodGroupText = "B+";
+            else if (abRadioButton.isSelected()) bloodGroupText = "AB+";
+            else if (oRadioButton.isSelected()) bloodGroupText = "O+";
+            else if (aMinusRadioButton.isSelected()) bloodGroupText = "A-";
+            else if (bMinusRadioButton.isSelected()) bloodGroupText = "B-";
+            else if (abMinusRadioButton.isSelected()) bloodGroupText = "AB-";
+            else if (oMinusRadioButton.isSelected()) bloodGroupText = "O-";
 
-            if (aRadioButton.isSelected())
-                bloodGroup = "A+";
-            else if (bRadioButton.isSelected())
-                bloodGroup = "B+";
-            else if (abRadioButton.isSelected())
-                bloodGroup = "AB+";
-            else if (oRadioButton.isSelected())
-                bloodGroup = "O+";
+            tableModel.addRow(new Object[]{
+                name, address, nation, email, dob, contact, program, gender, bloodGroupText
+            });
 
-            JOptionPane.showMessageDialog(this,
-                    "Name: " + name + "\nPresent Address: " + address + "\nNationality: " + nation + "\nGender: "
-                            + gender + "\nSubjects: "
-                            + subjects + "\nBlood Group: " + bloodGroup);
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter("admission_records.txt", true))) {
+                writer.write(String.join(", ", name, address, nation, email, dob, contact, program, gender, bloodGroupText));
+                writer.newLine();
+            } catch (IOException ioException) {
+                JOptionPane.showMessageDialog(this, "Error saving to file.", "File Error", JOptionPane.ERROR_MESSAGE);
+            }
         } else if (e.getSource() == resetButton) {
             nameField.setText("");
             presAddress.setText("");
             nationality.setText("");
-
-            maleRadio.setSelected(false);
-            femaleRadio.setSelected(false);
-            aRadioButton.setSelected(false);
-            bRadioButton.setSelected(false);
-            abRadioButton.setSelected(false);
-            oRadioButton.setSelected(false);
-
-            mathCheckBox.setSelected(false);
-            physicsCheckBox.setSelected(false);
-            chemistryCheckBox.setSelected(false);
+            emailField.setText("");
+            dobSpinner.setValue(new java.util.Date());
+            contactField.setText("");
+            programComboBox.setSelectedIndex(0);
+            genderGroup.clearSelection();
+            bloodGroup.clearSelection();
         }
     }
-
 }
