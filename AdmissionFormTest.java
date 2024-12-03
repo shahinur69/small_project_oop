@@ -152,7 +152,7 @@ int main()
 
  */
 
- //// end the lcs 
+ //// end the lcs -------------------------------------------------------s
  /*#include <bits/stdc++.h>
 using namespace std;
 int LCS(string s1, string s2, int x, int y, int c[1000][1000])
